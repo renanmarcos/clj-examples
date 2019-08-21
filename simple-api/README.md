@@ -1,6 +1,6 @@
 # simple-api
 
-FIXME
+Basic CRUD API with atom data structure
 
 ## Prerequisites
 
