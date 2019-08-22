@@ -1,34 +1,38 @@
 (ns simple_api.employers)
 
-;; Our atom collection
+;; Our vector of atoms
 (def employers-collection (atom []))
+(def current-id (atom 0))
 
-;; Generate a new id
-(defn new-id [] 
-    (if (= (count @employers-collection) 0) 1
-            (count @employers-collection)))
+;; Generate a new id for our vector
+(defn new-id []
+    (swap! current-id inc)
+    @current-id)
 
 ;; GET /employers
 (defn get-employers [] @employers-collection)
 
 ;; GET /employers/:id
 (defn get-employer [id] 
-    (first 
-        (filter #(= (:id %) id) @employers-collection)))
+    (some #(when (= (:id %) id) %) @employers-collection))
 
 ;; POST /employers
 (defn add-employer [name job]
-    (let [response {:name name :job job}]
-        (swap! employers-collection conj {:id (new-id) :name name :job job})
+    (let [response {:id (new-id) :name name :job job}]
+        (swap! employers-collection conj response)
         response))
 
-;; PUT /employers/:id - TODO
+;; PUT /employers/:id
 (defn update-employer [id name job]
-    (let [response {:id id :name name :job job}]
-        response))
+    (let [response {:id id :name name :job job} 
+          index (.indexOf @employers-collection (get-employer id))]
+        (swap! employers-collection assoc-in [index :job] job)
+        (swap! employers-collection assoc-in [index :name] name)
+    response))
 
-;; DELETE /employers/:id - TODO
+;; DELETE /employers/:id
 (defn delete-employer [id]
     (swap! employers-collection 
         (fn [current-atom] 
-            (remove #(= (:id %) id) current-atom))))
+            (remove #(= (:id %) id) current-atom)))
+    nil)
