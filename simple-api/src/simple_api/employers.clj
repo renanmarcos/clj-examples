@@ -29,4 +29,6 @@
 
 ;; DELETE /employers/:id - TODO
 (defn delete-employer [id]
-    (swap! employers-collection #(remove (fn [x] (= (:id x) id)) @employers-collection)))
+    (swap! employers-collection 
+        (fn [current-atom] 
+            (remove #(= (:id %) id) current-atom))))
